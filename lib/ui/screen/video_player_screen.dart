@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
@@ -10,14 +12,22 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  _launchURL() async {
+    const url = 'https://flutter.dev';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   VideoPlayerController _controller;
   Future<void> _initializeVideoPlayerFuture;
 
   @override
   void initState() {
     _controller = VideoPlayerController.network(
-        'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4');
-
+        'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4');
     _initializeVideoPlayerFuture = _controller.initialize();
 
     //_controller.setLooping(true);
@@ -34,10 +44,44 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: Drawer(
+        child: DrawerHeader(
+            child: Column(
+          children: [
+            FlutterLogo(
+              size: 50,
+            ),
+            Divider(),
+            RaisedButton(
+              onPressed: () async {
+                String telephoneNumber = "tel:915975385";
+                if (await canLaunch(telephoneNumber)) {
+                  await launch(telephoneNumber);
+                } else {
+                  throw 'Could not launch $telephoneNumber';
+                }
+              },
+              child: Text('Telephone'),
+            ),
+            FlatButton(onPressed: () {}, child: Text('Email')),
+            OutlineButton.icon(
+              onPressed: () {},
+              icon: Icon(Icons.map),
+              label: Text('Maps'),
+            ),
+            IconButton(
+                icon: Icon(Icons.laptop_chromebook),
+                onPressed: () {
+                  print("alert");
+                  _launchURL();
+                })
+          ],
+        )),
+      ),
       appBar: AppBar(title: Text('Video Player')),
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             FutureBuilder(
               future: _initializeVideoPlayerFuture,
@@ -51,7 +95,26 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   return Center(child: CupertinoActivityIndicator());
                 }
               },
-            )
+            ),
+            IconButton(
+              icon: Icon(Icons.laptop_chromebook),
+              onPressed: () async {
+                if (await canLaunch('https://flutter.dev')) {
+                  final nativeAppLaunchedSucceeded = await launch(
+                    'https://flutter.dev',
+                    universalLinksOnly: true,
+                    forceSafariVC: false,
+                  );
+                  if (!nativeAppLaunchedSucceeded) {
+                    await launch(
+                      'https://flutter.dev',
+                      universalLinksOnly: false,
+                      forceSafariVC: false,
+                    );
+                  }
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -76,21 +139,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           ),
           SizedBox(
             width: 15,
-          ),
-          FloatingActionButton(
-            onPressed: () {},
-            child: Icon(
-              Icons.play_arrow_rounded,
-            ),
-          ),
-          SizedBox(
-            width: 15,
-          ),
-          FloatingActionButton(
-            onPressed: () {},
-            child: Icon(
-              Icons.play_arrow_rounded,
-            ),
           ),
         ],
       ),
