@@ -24,6 +24,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   VideoPlayerController _controller;
   Future<void> _initializeVideoPlayerFuture;
 
+  final String lat = '26.157539';
+  final String lng = '-80.214855';
+
   @override
   void initState() {
     _controller = VideoPlayerController.network(
@@ -65,7 +68,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             ),
             FlatButton(onPressed: () {}, child: Text('Email')),
             OutlineButton.icon(
-              onPressed: () {},
+              onPressed: () async {
+                final googleMapsUrl = 'comgooglemaps://?center=$lat,$lng';
+                final appleMapsUrl = 'https://maps.apple.com/?q=$lat,$lng';
+                if (await canLaunch(googleMapsUrl)) {
+                  await launch(googleMapsUrl);
+                }
+                if (await canLaunch(appleMapsUrl)) {
+                  await launch(appleMapsUrl, forceSafariVC: false);
+                } else {
+                  throw "Not connect with URL";
+                }
+              },
               icon: Icon(Icons.map),
               label: Text('Maps'),
             ),
